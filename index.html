@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>실시간 점심메뉴 추천기 v1.4</title>
+  <title>실시간 점심메뉴 추천기 v1.5</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -36,7 +36,6 @@
     }
   </style>
 
-  <!-- 카카오맵 API 키 연결 -->
   <script type="text/javascript"
     src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bda08e9f279c89072b326821b6c883c2&libraries=services">
   </script>
@@ -52,7 +51,6 @@
   <option value="중식">중식</option>
   <option value="일식">일식</option>
   <option value="양식">양식</option>
-  <option value="기타">아시안</option>
 </select>
 
 <label for="price">가격대</label>
@@ -82,10 +80,7 @@
         if (price === "mid") radius = 2000;
         if (price === "high") radius = 3000;
 
-        let query = category;
-        if (category === "기타") {
-          query = "태국 음식 베트남 음식 아시안 음식 퓨전 음식";
-        }
+        const query = category;
 
         const options = {
           location: new kakao.maps.LatLng(lat, lon),
@@ -96,22 +91,8 @@
         ps.keywordSearch(query, function (data, status) {
           if (status === kakao.maps.services.Status.OK) {
 
-            // 제외할 키워드 목록
-            const excludeKeywords = ["한식", "일식", "중식", "양식", "김밥", "분식", "돈까스"];
-
-            // 필터링: 제외 키워드 포함 가게 제거
-            const filtered = data.filter(place => {
-              return !excludeKeywords.some(keyword => place.place_name.includes(keyword));
-            });
-
-            if (filtered.length === 0) {
-              document.getElementById("result").innerText = "적절한 추천 결과가 없습니다.";
-              return;
-            }
-
-            // 데이터 섞기 & 5개만 선택
-            filtered.sort(() => Math.random() - 0.5);
-            const pick = filtered.slice(0, 5);
+            data.sort(() => Math.random() - 0.5);
+            const pick = data.slice(0, 5);
 
             let resultHTML = `<b>${query} (${radius / 1000}km 이내 추천)</b><ul>`;
             pick.forEach(function (place) {
