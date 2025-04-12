@@ -36,82 +36,88 @@
     }
   </style>
 
-  <!-- 카카오맵 API 키 연결 -->
-  <script type="text/javascript" 
-src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bda08e9f279c89072b326821b6c883c2&libraries=services">
-</script>
-
+  <!-- 카카오맵 API 스크립트 (https 경로 주의!!) -->
+  <script type="text/javascript"
+    src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bda08e9f279c89072b326821b6c883c2&libraries=services">
+  </script>
+</head>
 
 <body>
 
-  <h1>오늘 뭐 먹지? 🍽️</h1>
+<h1>오늘 뭐 먹지? 🍽️</h1>
 
-  <label for="category">식사 종류</label>
-  <select id="category">
-    <option value="한식">한식</option>
-    <option value="중식">중식</option>
-    <option value="일식">일식</option>
-    <option value="양식">양식</option>
-    <option value="기타">기타</option>
-  </select>
+<label for="category">식사 종류</label>
+<select id="category">
+  <option value="한식">한식</option>
+  <option value="중식">중식</option>
+  <option value="일식">일식</option>
+  <option value="양식">양식</option>
+  <option value="기타">기타</option>
+</select>
 
-  <label for="price">가격대</label>
-  <select id="price">
-    <option value="low">~10,000원</option>
-    <option value="mid">~20,000원</option>
-    <option value="high">20,000원 이상</option>
-  </select>
+<label for="price">가격대</label>
+<select id="price">
+  <option value="low">~10,000원</option>
+  <option value="mid">~20,000원</option>
+  <option value="high">20,000원 이상</option>
+</select>
 
-  <button onclick="recommend()">추천받기!</button>
+<button onclick="recommend()">추천받기!</button>
 
-  <div id="result">추천 결과가 여기에 표시됩니다.</div>
+<div id="result">추천 결과가 여기에 표시됩니다.</div>
 
-  <script>
-    function recommend() {
-      const category = document.getElementById("category").value;
-      const price = document.getElementById("price").value;
+<script>
+  function recommend() {
+    const category = document.getElementById("category").value;
+    const price = document.getElementById("price").value;
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function (position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
 
-          const ps = new kakao.maps.services.Places();
+        const ps = new kakao.maps.services.Places();
 
-          let radius = 1000;  // ~10,000원
-          if (price === "mid") {
-            radius = 2000;  // ~20,000원
-          } else if (price === "high") {
-            radius = 3000;  // 20,000원 이상
+        let radius = 1000; // 가격대에 따른 검색 반경
+        if (price === "mid") {
+          radius = 2000;
+        } else if (price === "high") {
+          radius = 3000;
+        }
+
+        const options = {
+          location: new kakao.maps.LatLng(lat, lon),
+          radius: radius,
+          size: 5
+        };
+
+        ps.keywordSearch(category, function (data, status) {
+          if (status === kakao.maps.services.Status.OK) {
+
+            // 결과 섞기!
+            data.sort(() => Math.random() - 0.5);
+
+            let resultHTML = `<b>${category} (${radius / 1000}km 이내 추천)</b><ul>`;
+            data.forEach(function (place) {
+              resultHTML += `<li><strong>${place.place_name}</strong><br>${place.road_address_name || place.address_name}</li>`;
+            });
+            resultHTML += "</ul>";
+
+            document.getElementById("result").innerHTML = resultHTML;
+
+          } else {
+            document.getElementById("result").innerText = "근처에 추천 결과가 없습니다.";
           }
+        }, options);
 
-          const options = {
-            location: new kakao.maps.LatLng(lat, lon),
-            radius: radius,
-            size: 5
-          };
-
-          ps.keywordSearch(category, function(data, status) {
-            if (status === kakao.maps.services.Status.OK) {
-              let resultHTML = `<b>${category} (${radius/1000}km 이내 추천)</b><ul>`;
-              data.forEach(function(place) {
-                resultHTML += `<li><strong>${place.place_name}</strong><br>${place.road_address_name || place.address_name}</li>`;
-              });
-              resultHTML += "</ul>";
-              document.getElementById("result").innerHTML = resultHTML;
-            } else {
-              document.getElementById("result").innerText = "근처에 추천 결과가 없습니다.";
-            }
-          }, options);
-
-        }, function(error) {
-          document.getElementById("result").innerText = "위치 정보를 가져올 수 없습니다.";
-        });
-      } else {
-        document.getElementById("result").innerText = "이 브라우저에서는 위치 정보 지원이 안됩니다.";
-      }
+      }, function (error) {
+        document.getElementById("result").innerText = "위치 정보를 가져올 수 없습니다.";
+      });
+    } else {
+      document.getElementById("result").innerText = "이 브라우저는 위치 정보 지원이 안됩니다.";
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>
