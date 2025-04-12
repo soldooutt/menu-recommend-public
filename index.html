@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>실시간 점심메뉴 추천기 v1.3</title>
+  <title>실시간 점심메뉴 추천기 v1.4</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -36,6 +36,7 @@
     }
   </style>
 
+  <!-- 카카오맵 API 키 연결 -->
   <script type="text/javascript"
     src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bda08e9f279c89072b326821b6c883c2&libraries=services">
   </script>
@@ -83,21 +84,34 @@
 
         let query = category;
         if (category === "기타") {
-          query = "베트남 음식 태국 음식 아시안 음식";  // 기타 처리
+          query = "태국 음식 베트남 음식 아시안 음식 퓨전 음식";
         }
 
         const options = {
           location: new kakao.maps.LatLng(lat, lon),
           radius: radius,
-          size: 30 // 많이 가져오기
+          size: 30
         };
 
         ps.keywordSearch(query, function (data, status) {
           if (status === kakao.maps.services.Status.OK) {
 
-            // 데이터 섞고 5개 뽑기
-            data.sort(() => Math.random() - 0.5);
-            const pick = data.slice(0, 5);
+            // 제외할 키워드 목록
+            const excludeKeywords = ["한식", "일식", "중식", "양식", "김밥", "분식", "돈까스"];
+
+            // 필터링: 제외 키워드 포함 가게 제거
+            const filtered = data.filter(place => {
+              return !excludeKeywords.some(keyword => place.place_name.includes(keyword));
+            });
+
+            if (filtered.length === 0) {
+              document.getElementById("result").innerText = "적절한 추천 결과가 없습니다.";
+              return;
+            }
+
+            // 데이터 섞기 & 5개만 선택
+            filtered.sort(() => Math.random() - 0.5);
+            const pick = filtered.slice(0, 5);
 
             let resultHTML = `<b>${query} (${radius / 1000}km 이내 추천)</b><ul>`;
             pick.forEach(function (place) {
@@ -116,7 +130,7 @@
         document.getElementById("result").innerText = "위치 정보를 가져올 수 없습니다.";
       });
     } else {
-      document.getElementById("result").innerText = "브라우저가 위치정보를 지원하지 않습니다.";
+      document.getElementById("result").innerText = "브라우저가 위치 정보를 지원하지 않습니다.";
     }
   }
 </script>
