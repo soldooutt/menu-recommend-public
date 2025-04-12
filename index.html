@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>실시간 점심메뉴 추천기 v1.2</title>
+  <title>실시간 점심메뉴 추천기 v1.3</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -36,7 +36,6 @@
     }
   </style>
 
-  <!-- 카카오맵 API (https 필수) -->
   <script type="text/javascript"
     src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bda08e9f279c89072b326821b6c883c2&libraries=services">
   </script>
@@ -52,7 +51,7 @@
   <option value="중식">중식</option>
   <option value="일식">일식</option>
   <option value="양식">양식</option>
-  <option value="기타">기타</option>
+  <option value="기타">아시안</option>
 </select>
 
 <label for="price">가격대</label>
@@ -78,25 +77,25 @@
 
         const ps = new kakao.maps.services.Places();
 
-        let radius = 1000; // 기본 1km
+        let radius = 1000;
         if (price === "mid") radius = 2000;
         if (price === "high") radius = 3000;
 
         let query = category;
         if (category === "기타") {
-          query = "맛집"; // 기타 선택 시 "맛집"으로 검색
+          query = "베트남 음식 태국 음식 아시안 음식";  // 기타 처리
         }
 
         const options = {
           location: new kakao.maps.LatLng(lat, lon),
           radius: radius,
-          size: 15  // 결과 많이 가져오기
+          size: 30 // 많이 가져오기
         };
 
         ps.keywordSearch(query, function (data, status) {
           if (status === kakao.maps.services.Status.OK) {
 
-            // 결과 섞고 5개만 뽑기
+            // 데이터 섞고 5개 뽑기
             data.sort(() => Math.random() - 0.5);
             const pick = data.slice(0, 5);
 
