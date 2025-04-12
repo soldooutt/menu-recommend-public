@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>실시간 점심메뉴 추천기 v1.8 FINAL</title>
+  <title>실시간 점심메뉴 추천기 v1.9 FINAL</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -36,7 +36,6 @@
     }
   </style>
 
-  <!-- 카카오맵 API -->
   <script type="text/javascript"
     src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bda08e9f279c89072b326821b6c883c2&libraries=services">
   </script>
@@ -77,32 +76,47 @@
 
         const ps = new kakao.maps.services.Places();
 
-        // 핵심 수정! 검색어 + "맛집" 붙이기
-        const query = category + " 맛집";
+        const firstQuery = category + " 맛집";  // 첫 시도
+        const fallbackQuery = "맛집";          // 실패 시 fallback
 
         const options = {
           location: new kakao.maps.LatLng(lat, lon),
           size: 30
         };
 
-        ps.keywordSearch(query, function (data, status) {
-          if (status === kakao.maps.services.Status.OK) {
+        function searchPlaces(query, isFallback = false) {
+          ps.keywordSearch(query, function (data, status) {
+            if (status === kakao.maps.services.Status.OK) {
 
-            data.sort(() => Math.random() - 0.5);
-            const pick = data.slice(0, 5);
+              data.sort(() => Math.random() - 0.5);
+              const pick = data.slice(0, 5);
 
-            let resultHTML = `<b>${query} 추천 메뉴</b><ul>`;
-            pick.forEach(function (place) {
-              resultHTML += `<li><strong>${place.place_name}</strong><br>${place.road_address_name || place.address_name}</li>`;
-            });
-            resultHTML += "</ul>";
+              let resultHTML = "";
 
-            document.getElementById("result").innerHTML = resultHTML;
+              if (isFallback) {
+                resultHTML += `<p style="color:red;">'${category}' 식당이 없어 근처 맛집으로 추천해드려요!</p>`;
+              }
 
-          } else {
-            document.getElementById("result").innerText = "추천 결과가 없습니다.";
-          }
-        }, options);
+              resultHTML += `<b>${query} 추천 메뉴</b><ul>`;
+              pick.forEach(function (place) {
+                resultHTML += `<li><strong>${place.place_name}</strong><br>${place.road_address_name || place.address_name}</li>`;
+              });
+              resultHTML += "</ul>";
+
+              document.getElementById("result").innerHTML = resultHTML;
+
+            } else {
+              if (!isFallback) {
+                // 첫 시도 실패시 fallback 재검색
+                searchPlaces(fallbackQuery, true);
+              } else {
+                document.getElementById("result").innerText = "추천 결과가 없습니다.";
+              }
+            }
+          }, options);
+        }
+
+        searchPlaces(firstQuery);  // 첫 검색 시도
 
       }, function (error) {
         document.getElementById("result").innerText = "위치 정보를 가져올 수 없습니다.";
