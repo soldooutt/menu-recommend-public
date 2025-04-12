@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>실시간 점심메뉴 추천기 v1.7 Final</title>
+  <title>실시간 점심메뉴 추천기 v1.8 FINAL</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -77,9 +77,9 @@
 
         const ps = new kakao.maps.services.Places();
 
-        const query = category;
+        // 핵심 수정! 검색어 + "맛집" 붙이기
+        const query = category + " 맛집";
 
-        // radius 제거하고 size만 사용
         const options = {
           location: new kakao.maps.LatLng(lat, lon),
           size: 30
