@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>실시간 점심메뉴 추천기 v1.5</title>
+  <title>실시간 점심메뉴 추천기 v1.6</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -36,6 +36,7 @@
     }
   </style>
 
+  <!-- 카카오맵 API -->
   <script type="text/javascript"
     src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=bda08e9f279c89072b326821b6c883c2&libraries=services">
   </script>
@@ -80,7 +81,7 @@
         if (price === "mid") radius = 2000;
         if (price === "high") radius = 3000;
 
-        const query = category;
+        const query = category;  // 카테고리 그대로 검색
 
         const options = {
           location: new kakao.maps.LatLng(lat, lon),
@@ -91,8 +92,8 @@
         ps.keywordSearch(query, function (data, status) {
           if (status === kakao.maps.services.Status.OK) {
 
-            data.sort(() => Math.random() - 0.5);
-            const pick = data.slice(0, 5);
+            data.sort(() => Math.random() - 0.5); // 섞기
+            const pick = data.slice(0, 5); // 5개 선택
 
             let resultHTML = `<b>${query} (${radius / 1000}km 이내 추천)</b><ul>`;
             pick.forEach(function (place) {
